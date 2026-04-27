@@ -13,20 +13,23 @@
     "@supabase/supabase-js": "latest",
     "lucide-react": "latest",
     "next": "latest",
-    "openai": "latest",
+    "openai": "^6.34.0",
+    "qrcode.react": "^4.2.0",
     "react": "latest",
     "react-dom": "latest",
+    "recharts": "^3.8.1",
     "zod": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "autoprefixer": "latest",
+    "autoprefixer": "^10.5.0",
     "eslint": "latest",
     "eslint-config-next": "latest",
-    "postcss": "latest",
-    "tailwindcss": "latest",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.4",
     "typescript": "latest"
   }
 }
