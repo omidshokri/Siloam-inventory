@@ -1,16 +1,14 @@
-import { InventoryItem } from "@/types/inventory";
 import Link from "next/link";
-import { createClient } from "@supabase/supabase-js";
+import { PlusCircle, Download } from "lucide-react";
+import { createServerSupabase } from "@/lib/supabase-server";
+import { money, itemCost, netProfit } from "@/lib/calculations";
 import PieChartBreakdown from "@/components/PieChartBreakdown";
 import BarChartProfit from "@/components/BarChartProfit";
+import { InventoryItem } from "@/types/inventory";
 
+const TAX_RATE = 0.25;
 
-type StatProps = {
-  label: string;
-  value: string;
-};
-
-function Stat({ label, value }: StatProps) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="stat-card">
       <p>{label}</p>
@@ -19,64 +17,26 @@ function Stat({ label, value }: StatProps) {
   );
 }
 
-function money(value: number) {
-  return `$${value.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+export default async function DashboardPage() {
+  const supabase = createServerSupabase();
 
-function numberValue(value: number | null | undefined) {
-  return Number(value ?? 0);
-}
-
-function netProfit(item: InventoryItem) {
-  const salePrice = numberValue(item.sale_price);
-  const purchasePrice = numberValue(item.purchase_price);
-  const purchaseTax = numberValue(item.purchase_tax_paid);
-  const repairCost = numberValue(item.repair_cost);
-  const shippingCost = numberValue(item.shipping_cost);
-  const platformFees = numberValue(item.platform_fees);
-  const sellingFees = numberValue(item.selling_fees);
-
-  return (
-    salePrice -
-    purchasePrice -
-    purchaseTax -
-    repairCost -
-    shippingCost -
-    platformFees -
-    sellingFees
-  );
-}
-
-async function getItems(): Promise<InventoryItem[]> {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("inventory_items")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(error);
-    return [];
-  }
-
-  return (data || []) as InventoryItem[];
-}
-
-export default async function Page() {
-  const items = await getItems();
+  const items = (data || []) as InventoryItem[];
 
   const inStockItems = items.filter((item) => item.status !== "sold");
   const soldItems = items.filter((item) => item.status === "sold");
 
+  const inventoryValue = inStockItems.reduce(
+    (sum, item) => sum + itemCost(item),
+    0
+  );
+
   const totalSales = soldItems.reduce(
-    (sum, item) => sum + numberValue(item.sale_price),
+    (sum, item) => sum + Number(item.sale_price ?? 0),
     0
   );
 
@@ -85,19 +45,18 @@ export default async function Page() {
     0
   );
 
-  const TAX_RATE = 0.25;
   const estimatedTax = totalProfit > 0 ? totalProfit * TAX_RATE : 0;
   const profitAfterTax = totalProfit - estimatedTax;
 
   const salesTaxCollected = soldItems.reduce(
-    (sum, item) => sum + numberValue(item.sales_tax_collected),
+    (sum, item) => sum + Number(item.sales_tax_collected ?? 0),
     0
   );
 
   const pieChartData = [
+    { name: "Purchase Price", value: inventoryValue },
     { name: "Profit", value: totalProfit },
-    { name: "Estimated Tax", value: estimatedTax },
-    { name: "After Tax", value: profitAfterTax },
+    { name: "Estimated Profit Tax", value: estimatedTax },
     { name: "Sales Tax Collected", value: salesTaxCollected },
   ];
 
@@ -106,10 +65,10 @@ export default async function Page() {
 
     return {
       name: item.name || "Item",
-      purchase: numberValue(item.purchase_price),
+      purchase: Number(item.purchase_price ?? 0),
       profit,
       estimatedProfitTax: profit > 0 ? profit * TAX_RATE : 0,
-      salesTaxCollected: numberValue(item.sales_tax_collected),
+      salesTaxCollected: Number(item.sales_tax_collected ?? 0),
     };
   });
 
@@ -125,17 +84,19 @@ export default async function Page() {
 
             <div className="actions">
               <Link href="/items/new" className="primary-btn">
-                + Add
+                <PlusCircle size={18} />
+                Add
               </Link>
 
-              <Link href="/api/export" className="secondary-btn">
+              <a href="/api/export" className="secondary-btn">
+                <Download size={18} />
                 Export
-              </Link>
+              </a>
             </div>
           </div>
 
           <div className="stats-grid">
-            <Stat label="Inventory" value={money(0)} />
+            <Stat label="Inventory" value={money(inventoryValue)} />
             <Stat label="Sales" value={money(totalSales)} />
             <Stat label="Profit" value={money(totalProfit)} />
             <Stat label="Estimated Tax" value={money(estimatedTax)} />
@@ -178,7 +139,7 @@ export default async function Page() {
                       <h3>{item.name}</h3>
 
                       <p className="muted">
-                        Cost: {money(numberValue(item.purchase_price))} · Status:{" "}
+                        Cost: {money(Number(item.purchase_price ?? 0))} · Status:{" "}
                         {item.status || "in stock"}
                       </p>
                     </div>
@@ -191,18 +152,12 @@ export default async function Page() {
                           Profit {money(netProfit(item))}
                         </span>
 
-                        <Link
-                          href={`/items/${item.id}/sell`}
-                          className="edit-btn"
-                        >
+                        <Link href={`/items/${item.id}/sell`} className="edit-btn">
                           Edit Sale
                         </Link>
                       </>
                     ) : (
-                      <Link
-                        href={`/items/${item.id}/sell`}
-                        className="sell-btn"
-                      >
+                      <Link href={`/items/${item.id}/sell`} className="sell-btn">
                         Mark as Sold
                       </Link>
                     )}
