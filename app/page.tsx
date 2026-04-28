@@ -153,9 +153,7 @@ export default async function DashboardPage() {
                   <Link href={`/items/${item.id}`} className="item-title-link">
                     <div>
                       <p className="serial">
-                        {item.inventory_number ||
-                          item.serial_number ||
-                          "No inventory number"}
+((item as any).inventory_number || item.serial_number || "No inventory number")
                       </p>
 
                       <h3>{item.name}</h3>
