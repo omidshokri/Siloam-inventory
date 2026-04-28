@@ -4,7 +4,25 @@ import { createServerSupabase } from "@/lib/supabase-server";
 import { money, itemCost, netProfit } from "@/lib/calculations";
 import PieChartBreakdown from "@/components/PieChartBreakdown";
 import BarChartProfit from "@/components/BarChartProfit";
-import { InventoryItem } from "@/types/inventory";
+
+type InventoryItem = {
+  id: string;
+  name: string;
+  category?: string | null;
+  serial_number?: string | null;
+  inventory_number?: string | null;
+  status?: string | null;
+  purchase_price?: number | null;
+  purchase_tax_paid?: number | null;
+  repair_cost?: number | null;
+  shipping_cost?: number | null;
+  platform_fees?: number | null;
+  sale_price?: number | null;
+  sales_tax_collected?: number | null;
+  selling_fees?: number | null;
+  sale_date?: string | null;
+  created_at?: string | null;
+};
 
 const TAX_RATE = 0.25;
 
@@ -20,10 +38,14 @@ function Stat({ label, value }: { label: string; value: string }) {
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("inventory_items")
     .select("*")
     .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+  }
 
   const items = (data || []) as InventoryItem[];
 
