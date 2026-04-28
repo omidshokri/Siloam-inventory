@@ -10,41 +10,21 @@ export async function POST(req: NextRequest) {
     const { image } = await req.json();
 
     if (!image) {
-      return NextResponse.json(
-        { error: "No image provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No image" }, { status: 400 });
     }
 
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: [
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
         {
           role: "user",
           content: [
             {
-              type: "input_text",
-              text: `
-Extract the following information from this receipt:
-
-- Product name
-- Serial number (if available)
-- Category (Laptop, Phone, Accessory, etc.)
-- Purchase price
-- Tax paid
-
-Return the result as JSON like this:
-{
-  "name": "",
-  "serial": "",
-  "category": "",
-  "price": "",
-  "tax": ""
-}
-              `,
+              type: "text",
+              text: `Extract product name, serial number, category, price, tax from this receipt and return JSON.`,
             },
             {
-              type: "input_image",
+              type: "image_url",
               image_url: {
                 url: image,
               },
@@ -54,19 +34,14 @@ Return the result as JSON like this:
       ],
     });
 
-    const outputText =
-      response.output_text ||
-      JSON.stringify(response.output[0]?.content || "");
-
     return NextResponse.json({
       success: true,
-      data: outputText,
+      data: response.choices[0].message.content,
     });
-  } catch (error: any) {
-    console.error("Error parsing receipt:", error);
-
+  } catch (err: any) {
+    console.error(err);
     return NextResponse.json(
-      { error: error.message || "Something went wrong" },
+      { error: err.message || "error" },
       { status: 500 }
     );
   }
