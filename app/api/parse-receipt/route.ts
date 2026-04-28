@@ -39,10 +39,10 @@ Extract receipt info and return ONLY JSON:
 }
               `,
             },
-            {
-              type: "input_image",
-              image_base64: base64,
-            },
+{
+  type: "input_image",
+  image_url: `data:image/png;base64,${base64}`,
+}
           ],
         },
       ],
