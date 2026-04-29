@@ -1,13 +1,43 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase-server";
 
-export async function GET() {
+export async function GET(req: Request) {
   const supabase = createServerSupabase();
 
-  const { data, error } = await supabase
+  const { searchParams } = new URL(req.url);
+
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const type = searchParams.get("type") || "all";
+
+  let query = supabase
     .from("inventory_items")
     .select("*")
     .order("created_at", { ascending: false });
+
+  // 📅 فیلتر تاریخ
+  if (from) {
+    query = query.gte("created_at", from);
+  }
+
+  if (to) {
+    query = query.lte("created_at", to);
+  }
+
+  // 📦 فیلتر نوع
+  if (type === "purchases") {
+    query = query.eq("status", "in_stock");
+  }
+
+  if (type === "sales") {
+    query = query.eq("status", "sold");
+  }
+
+  if (type === "stock") {
+    query = query.eq("status", "in_stock");
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -41,13 +71,16 @@ export async function GET() {
       item.purchase_price,
       item.sale_price,
       profit,
-      item.sales_tax_collected,
+      item.purchase_tax_paid,
       item.status,
-      item.sale_date || item.created_at,
-    ].join(",");
+      item.created_at,
+    ];
   });
 
-  const csv = [headers.join(","), ...rows].join("\n");
+  const csv =
+    [headers, ...rows]
+      .map((row) => row.join(","))
+      .join("\n");
 
   return new NextResponse(csv, {
     headers: {

@@ -112,10 +112,6 @@ export default async function DashboardPage() {
                 Add
               </Link>
 
-              <a href="/api/export" className="secondary-btn">
-                <Download size={18} />
-                Export
-              </a>
             </div>
           </div>
 
@@ -126,6 +122,7 @@ export default async function DashboardPage() {
             <Stat label="Estimated Tax" value={money(estimatedTax)} />
             <Stat label="After Tax" value={money(profitAfterTax)} />
             <Stat label="Items in Stock" value={String(inStockItems.length)} />
+
           </div>
         </section>
 
