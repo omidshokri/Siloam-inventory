@@ -1,31 +1,17 @@
-"use client";
+k"use client";
 
-import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
 
 export default function LogoutButton() {
-  const router = useRouter();
   const supabase = createBrowserSupabase();
 
-  const handleLogout = async () => {
+  async function logout() {
     await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  };
+    window.location.href = "/login";
+  }
 
   return (
-    <button
-      onClick={handleLogout}
-      style={{
-        padding: "10px 16px",
-        borderRadius: "12px",
-        border: "none",
-        background: "#ef4444",
-        color: "white",
-        fontWeight: "600",
-        cursor: "pointer",
-      }}
-    >
+    <button type="button" onClick={logout} className="secondary-btn">
       Logout
     </button>
   );
