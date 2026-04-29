@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
 import { PlusCircle, Download } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
@@ -109,7 +108,6 @@ export default async function DashboardPage() {
         {/* 🔍 Filters + List */}
 
       </div>
-<BottomNav />
     </main>
   );
 }
