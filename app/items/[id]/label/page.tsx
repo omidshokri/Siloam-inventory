@@ -90,7 +90,7 @@ export default function LabelPage({
 
   <div className="label-qr">
     <QRCodeCanvas
-      value={`${window.location.origin}/items/${id}`}
+value={inventoryNumber}
       size={52}
       level="M"
     />
