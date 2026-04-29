@@ -1,40 +1,41 @@
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase-server";
 
-export default async function LookupPage({
+export default async function Page({
   params,
 }: {
-  params: Promise<{ code: string }>;
+  params: { code: string };
 }) {
-  const { code } = await params;
-  const cleanCode = decodeURIComponent(code).trim();
+  try {
+    const code = decodeURIComponent(params.code);
 
-  const supabase = createServerSupabase();
+    const supabase = createServerSupabase();
 
-  const { data } = await supabase
-    .from("inventory_items")
-    .select("id, inventory_number, serial_number")
-    .or(
-      `inventory_number.eq.${cleanCode},serial_number.eq.${cleanCode},inventory_number.ilike.%${cleanCode}%`
-    )
-    .limit(1)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("inventory_items")
+      .select("id, inventory_number")
+      .ilike("inventory_number", `%${code}%`)
+      .limit(1)
+      .single();
 
-  if (!data) {
-    return (
-      <main className="app-shell">
-        <div className="apple-container">
-          <section className="hero-card">
-            <h1>Item not found</h1>
-            <p className="muted">{cleanCode}</p>
-          </section>
+    if (error || !data) {
+      return (
+        <div style={{ padding: 20 }}>
+          <h2>Item not found</h2>
+          <p>{code}</p>
         </div>
-      </main>
+      );
+    }
+
+    redirect(`/items/${data.id}`);
+  } catch (e) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Crash 😬</h2>
+        <pre>{String(e)}</pre>
+      </div>
     );
   }
-
-  redirect(`/items/${data.id}`);
 }
