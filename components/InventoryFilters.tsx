@@ -92,16 +92,7 @@ function handleScan(text: string) {
     setSearch(scanned);
     alert("Item not found");
   }
-});
-    if (found) {
-      router.push(`/items/${found.id}`);
-      return;
-    }
-
-    setSearch(scanned);
-    alert(`Item not found. Scanned: ${scanned}`);
-  }
-
+}
   return (
     <section className="section-card">
       <div className="hero-top">
