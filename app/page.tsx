@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+import LogoutButton from "@/components/LogoutButton";
 import Link from "next/link";
 import { PlusCircle, Download } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
@@ -88,6 +89,9 @@ export default async function DashboardPage() {
     const profit = item.status === "sold" ? netProfit(item) : 0;
 
     return {
+<div style={{ position: "absolute", top: 20, right: 20 }}>
+  <LogoutButton />
+</div>
       name: item.name || "Item",
       purchase: Number(item.purchase_price ?? 0),
       profit,
