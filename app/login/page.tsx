@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const supabase = createBrowserSupabase();
-  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
-  async function handleLogin() {
+  async function login(e: React.FormEvent) {
+    e.preventDefault();
     setLoading(true);
+    setMessage("");
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -23,67 +25,101 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      alert(error.message);
+      setMessage(error.message);
       return;
     }
 
-    router.push("/");
+    window.location.href = "/";
   }
 
-  async function handleReset() {
-    if (!email) {
-      alert("Enter your email first");
+  async function resetPassword() {
+    setLoading(true);
+    setMessage("");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setMessage(error.message);
       return;
     }
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Reset email sent");
-    }
+    setMessage("Password reset email sent.");
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <div className="w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border">
-
-        <h1 className="text-xl font-semibold mb-6 text-center">
-          Siloam Inventory
-        </h1>
-
-        <input
-          className="w-full h-11 px-3 mb-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <input
-          className="w-full h-11 px-3 mb-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full h-11 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition"
+    <main className="app-shell">
+      <div className="apple-container">
+        <section
+          className="hero-card"
+          style={{
+            maxWidth: "520px",
+            margin: "80px auto",
+            padding: "42px",
+          }}
         >
-          {loading ? "Loading..." : "Login"}
-        </button>
+          <p className="eyebrow">Private access</p>
+          <h1>Siloam Inventory</h1>
+          <p className="muted">Login to continue.</p>
 
-        <button
-          onClick={handleReset}
-          className="w-full mt-3 text-xs text-gray-500 hover:underline"
-        >
-          Forgot password?
-        </button>
+          <form onSubmit={login} style={{ marginTop: 28 }}>
+            <label className="field" style={{ marginBottom: 14 }}>
+              <span>Email</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
 
+            <label className="field" style={{ marginBottom: 20 }}>
+              <span>Password</span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </label>
+
+            <button className="primary-btn" type="submit" disabled={loading}>
+              {loading ? "Please wait..." : "Login"}
+            </button>
+          </form>
+
+          <div style={{ marginTop: 32 }}>
+            <p className="muted">Forgot password?</p>
+
+            <label className="field" style={{ marginBottom: 14 }}>
+              <span>Email for recovery</span>
+              <input
+                type="email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+            </label>
+
+            <button
+              className="secondary-btn"
+              type="button"
+              onClick={resetPassword}
+              disabled={loading || !resetEmail}
+            >
+              Send reset email
+            </button>
+          </div>
+
+          {message && (
+            <p className="muted" style={{ marginTop: 20 }}>
+              {message}
+            </p>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
