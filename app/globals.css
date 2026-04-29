@@ -502,3 +502,76 @@ h2 {
     border-radius: 24px;
   }
 }
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 18px 10px 44px;
+  }
+
+  .apple-container {
+    width: 100%;
+  }
+
+  .hero-card,
+  .section-card {
+    border-radius: 28px;
+    padding: 24px 18px;
+    margin-bottom: 18px;
+  }
+
+  .hero-top {
+    gap: 18px;
+  }
+
+  h1 {
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.05em;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .eyebrow,
+  .muted,
+  .serial {
+    font-size: 14px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat-card,
+  .field,
+  .item-row {
+    border-radius: 22px;
+    padding: 18px;
+  }
+
+  .stat-card strong {
+    font-size: 26px;
+  }
+
+  .actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .actions .primary-btn,
+  .actions .secondary-btn,
+  .actions .danger-btn {
+    min-height: 46px;
+    padding: 0 12px;
+    font-size: 14px;
+    border-radius: 999px;
+  }
+
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
