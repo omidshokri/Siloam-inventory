@@ -1,28 +1,45 @@
-import type { InventoryItem } from "./types";
+type MoneyValue = number | string | null | undefined;
 
-export function money(value: number | null | undefined) {
-  const amount = Number(value ?? 0);
+type CalculationItem = {
+  purchase_price?: MoneyValue;
+  purchase_tax_paid?: MoneyValue;
+  repair_cost?: MoneyValue;
+  shipping_cost?: MoneyValue;
+  platform_fees?: MoneyValue;
+  sale_price?: MoneyValue;
+  selling_fees?: MoneyValue;
+  status?: string | null;
+};
+
+function toNumber(value: MoneyValue) {
+  return Number(value ?? 0);
+}
+
+export function money(value: MoneyValue) {
+  const amount = toNumber(value);
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(amount);
 }
 
-export function itemCost(item: InventoryItem) {
+export function itemCost(item: CalculationItem) {
   return (
-    Number(item.purchase_price ?? 0) +
-    Number(item.purchase_tax_paid ?? 0) +
-    Number(item.repair_cost ?? 0) +
-    Number(item.shipping_cost ?? 0) +
-    Number(item.platform_fees ?? 0)
+    toNumber(item.purchase_price) +
+    toNumber(item.purchase_tax_paid) +
+    toNumber(item.repair_cost) +
+    toNumber(item.shipping_cost) +
+    toNumber(item.platform_fees)
   );
 }
 
-export function netProfit(item: InventoryItem) {
+export function netProfit(item: CalculationItem) {
   if (item.status !== "sold") return 0;
+
   return (
-    Number(item.sale_price ?? 0) -
+    toNumber(item.sale_price) -
     itemCost(item) -
-    Number(item.selling_fees ?? 0)
+    toNumber(item.selling_fees)
   );
 }
