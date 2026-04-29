@@ -1,23 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase-browser";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const supabase = createBrowserSupabase();
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [resetEmail, setResetEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
-  async function login(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLogin() {
     setLoading(true);
-    setMessage("");
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -27,93 +23,67 @@ export default function LoginPage() {
     setLoading(false);
 
     if (error) {
-      setMessage(error.message);
+      alert(error.message);
       return;
     }
 
     router.push("/");
-    router.refresh();
   }
 
-  async function resetPassword() {
-    setLoading(true);
-    setMessage("");
-
-    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    setLoading(false);
-
-    if (error) {
-      setMessage(error.message);
+  async function handleReset() {
+    if (!email) {
+      alert("Enter your email first");
       return;
     }
 
-    setMessage("Password reset email sent. Check your inbox.");
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      alert("Reset email sent");
+    }
   }
 
   return (
-    <main className="app-shell">
-      <div className="apple-container">
-        <section className="hero-card" style={{ maxWidth: 520, margin: "80px auto" }}>
-          <p className="eyebrow">Private access</p>
-          <h1>Siloam Inventory</h1>
-          <p className="muted">Login to continue.</p>
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border">
 
-          <form onSubmit={login} className="form-grid">
-            <label className="field">
-              <span>Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </label>
+        <h1 className="text-xl font-semibold mb-6 text-center">
+          Siloam Inventory
+        </h1>
 
-            <label className="field">
-              <span>Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
+        <input
+          className="w-full h-11 px-3 mb-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-            <button className="primary-btn" type="submit" disabled={loading}>
-              {loading ? "Please wait..." : "Login"}
-            </button>
-          </form>
+        <input
+          className="w-full h-11 px-3 mb-4 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <div style={{ marginTop: 28 }}>
-            <p className="muted">Forgot password?</p>
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full h-11 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition"
+        >
+          {loading ? "Loading..." : "Login"}
+        </button>
 
-            <div className="form-grid">
-              <label className="field">
-                <span>Email for recovery</span>
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                />
-              </label>
+        <button
+          onClick={handleReset}
+          className="w-full mt-3 text-xs text-gray-500 hover:underline"
+        >
+          Forgot password?
+        </button>
 
-              <button
-                className="secondary-btn"
-                type="button"
-                onClick={resetPassword}
-                disabled={loading || !resetEmail}
-              >
-                Send reset email
-              </button>
-            </div>
-          </div>
-
-          {message && <p className="muted" style={{ marginTop: 20 }}>{message}</p>}
-        </section>
       </div>
-    </main>
+    </div>
   );
 }
