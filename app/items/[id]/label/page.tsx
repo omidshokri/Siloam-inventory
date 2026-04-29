@@ -90,7 +90,7 @@ export default function LabelPage({
 
   <div className="label-qr">
     <QRCodeCanvas
-value={inventoryNumber}
+value={`https://siloam-inventory.vercel.app/lookup/${inventoryNumber}`}
       size={52}
       level="M"
     />
