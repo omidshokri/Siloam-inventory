@@ -15,7 +15,7 @@ export default function InventoryFilters({ items }: { items: any[] }) {
   const [showScanner, setShowScanner] = useState(false);
 
   const categories = useMemo(() => {
-    const unique = new Set(items.map((i) => i.category).filter(Boolean));
+    const unique = new Set(items.map((item) => item.category).filter(Boolean));
     return ["all", ...Array.from(unique)];
   }, [items]);
 
@@ -25,11 +25,12 @@ export default function InventoryFilters({ items }: { items: any[] }) {
     return items.filter((item) => {
       const matchesSearch =
         !q ||
-        item.name?.toLowerCase().includes(q) ||
-        item.category?.toLowerCase().includes(q) ||
-        item.vendor?.toLowerCase().includes(q) ||
-        item.serial_number?.toLowerCase().includes(q) ||
-        item.inventory_number?.toLowerCase().includes(q);
+        String(item.name || "").toLowerCase().includes(q) ||
+        String(item.category || "").toLowerCase().includes(q) ||
+        String(item.vendor || "").toLowerCase().includes(q) ||
+        String(item.serial_number || "").toLowerCase().includes(q) ||
+        String(item.inventory_number || "").toLowerCase().includes(q) ||
+        String(item.id || "").toLowerCase().includes(q);
 
       const matchesCategory = category === "all" || item.category === category;
       const matchesStatus = status === "all" || item.status === status;
@@ -41,18 +42,28 @@ export default function InventoryFilters({ items }: { items: any[] }) {
   function cleanScannedText(text: string) {
     let scanned = text.trim();
 
-    // اگر QR لینک کامل بود، آخرین بخش لینک را بگیر
-    // مثال: https://siloam-inventory.vercel.app/lookup/INV-20260429-9023
     try {
       if (scanned.startsWith("http")) {
         const url = new URL(scanned);
-        scanned = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() || scanned);
+        const parts = url.pathname.split("/").filter(Boolean);
+
+        // QR مثل:
+        // https://siloam-inventory.vercel.app/lookup/INV-20260429-9023
+        if (parts[0] === "lookup" && parts[1]) {
+          return decodeURIComponent(parts[1]).trim();
+        }
+
+        // QR مستقیم به محصول:
+        // https://siloam-inventory.vercel.app/items/f111bd3e...
+        if (parts[0] === "items" && parts[1]) {
+          return decodeURIComponent(parts[1]).trim();
+        }
       }
     } catch {
-      // اگر URL خراب بود، همان متن اصلی را نگه دار
+      // اگر URL نبود، همان متن اسکن‌شده را نگه می‌داریم
     }
 
-    return scanned.trim();
+    return scanned;
   }
 
   function handleScan(text: string) {
@@ -64,25 +75,22 @@ export default function InventoryFilters({ items }: { items: any[] }) {
     console.log("SCANNED:", scanned);
 
     const found = items.find((item) => {
-      const id = String(item.id || "").trim();
-      const inventoryNumber = String(item.inventory_number || "").trim();
-      const serialNumber = String(item.serial_number || "").trim();
-
-      const idLower = id.toLowerCase();
-      const invLower = inventoryNumber.toLowerCase();
-      const serialLower = serialNumber.toLowerCase();
+      const id = String(item.id || "").trim().toLowerCase();
+      const inventoryNumber = String(item.inventory_number || "")
+        .trim()
+        .toLowerCase();
+      const serialNumber = String(item.serial_number || "")
+        .trim()
+        .toLowerCase();
 
       return (
-        idLower === scannedLower ||
-        invLower === scannedLower ||
-        serialLower === scannedLower ||
-
-        // برای حالتی که QR ناقص باشد، مثلا فقط 20260429-9023
-        (invLower && invLower.includes(scannedLower)) ||
-        (scannedLower && scannedLower.includes(invLower)) ||
-
-        (serialLower && serialLower.includes(scannedLower)) ||
-        (scannedLower && scannedLower.includes(serialLower))
+        id === scannedLower ||
+        inventoryNumber === scannedLower ||
+        serialNumber === scannedLower ||
+        (inventoryNumber && inventoryNumber.includes(scannedLower)) ||
+        (inventoryNumber && scannedLower.includes(inventoryNumber)) ||
+        (serialNumber && serialNumber.includes(scannedLower)) ||
+        (serialNumber && scannedLower.includes(serialNumber))
       );
     });
 
@@ -117,6 +125,7 @@ export default function InventoryFilters({ items }: { items: any[] }) {
             type="button"
             className="secondary-btn camera-btn"
             onClick={() => setShowScanner(true)}
+            aria-label="Scan QR code"
           >
             📷
           </button>
