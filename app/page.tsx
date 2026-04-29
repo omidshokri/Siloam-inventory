@@ -9,7 +9,6 @@ import { money, netProfit, itemCost } from "@/lib/calculations";
 import PieChartBreakdown from "@/components/PieChartBreakdown";
 import BarChartProfit from "@/components/BarChartProfit";
 import LogoutButton from "../components/LogoutButton";
-import InventoryFilters from "@/components/InventoryFilters";
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -108,7 +107,6 @@ export default async function DashboardPage() {
         </section>
 
         {/* 🔍 Filters + List */}
-        <InventoryFilters items={items} />
 
       </div>
 <BottomNav />

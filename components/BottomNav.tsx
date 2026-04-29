@@ -45,7 +45,7 @@ export default function BottomNav() {
             <span>Home</span>
           </Link>
 
-          <Link href="/#inventory" className="bottom-nav-item">
+<Link href="/products" className="bottom-nav-item">
             <Package size={26} />
             <span>Products</span>
           </Link>
