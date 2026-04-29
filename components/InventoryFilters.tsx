@@ -66,34 +66,33 @@ export default function InventoryFilters({ items }: { items: any[] }) {
     return scanned;
   }
 
-  function handleScan(text: string) {
-    setShowScanner(false);
+function handleScan(text: string) {
+  setShowScanner(false);
 
-    const scanned = cleanScannedText(text);
-    const scannedLower = scanned.toLowerCase();
+  const scanned = text.trim();
 
-    console.log("SCANNED:", scanned);
+  console.log("SCANNED:", scanned);
 
-    const found = items.find((item) => {
-      const id = String(item.id || "").trim().toLowerCase();
-      const inventoryNumber = String(item.inventory_number || "")
-        .trim()
-        .toLowerCase();
-      const serialNumber = String(item.serial_number || "")
-        .trim()
-        .toLowerCase();
+  // اگر QR لینک کامل بود → مستقیم برو
+  if (scanned.startsWith("http")) {
+    window.location.href = scanned;
+    return;
+  }
 
-      return (
-        id === scannedLower ||
-        inventoryNumber === scannedLower ||
-        serialNumber === scannedLower ||
-        (inventoryNumber && inventoryNumber.includes(scannedLower)) ||
-        (inventoryNumber && scannedLower.includes(inventoryNumber)) ||
-        (serialNumber && serialNumber.includes(scannedLower)) ||
-        (serialNumber && scannedLower.includes(serialNumber))
-      );
-    });
+  // اگر لینک نبود → fallback به search
+  const found = items.find(
+    (item) =>
+      item.inventory_number === scanned ||
+      item.serial_number === scanned
+  );
 
+  if (found) {
+    router.push(`/items/${found.id}`);
+  } else {
+    setSearch(scanned);
+    alert("Item not found");
+  }
+});
     if (found) {
       router.push(`/items/${found.id}`);
       return;
