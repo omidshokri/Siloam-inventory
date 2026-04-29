@@ -92,40 +92,8 @@ export default async function DashboardPage() {
           ...
 </section>
 <InventoryFilters items={items} />
-        <section className="section-card">
-          <h2>Inventory Items</h2>
-
-          <div className="item-list">
-            {items.length === 0 ? (
-              <p className="empty-state">No items yet. Add your first purchase.</p>
-            ) : (
-              items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/items/${item.id}`}
-                  className="item-row"
-                >
-                  <div>
-                    <p className="serial">
-                      {(item as any).inventory_number ||
-                        item.serial_number ||
-                        "No inventory number"}
-                    </p>
-
-                    <h3>{item.name || "Item"}</h3>
-
-                    <p className="muted">
-                      Cost: {money(itemCost(item))} · Status:{" "}
-                      {item.status || "in_stock"}
-                    </p>
-                  </div>
-
-                  <strong>{money(netProfit(item))}</strong>
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
+          ...
+</section>
       </div>
     </main>
   );
