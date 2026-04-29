@@ -34,10 +34,12 @@ export default function BottomNav() {
 
     if (openSearch) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, [openSearch]);
 
@@ -45,7 +47,6 @@ export default function BottomNav() {
     e.preventDefault();
 
     const q = query.trim();
-
     if (!q) return;
 
     setOpenSearch(false);
@@ -77,26 +78,33 @@ export default function BottomNav() {
                 placeholder="Search inventory..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                style={{ flex: 1, minWidth: 0 }}
               />
 
               <button
                 type="button"
                 onClick={() => setOpenScanner(true)}
                 aria-label="Scan QR"
+                style={{ flexShrink: 0 }}
               >
-                <Camera size={22} />
+                <Camera size={20} />
               </button>
 
-              <button type="submit" aria-label="Search">
-                <Search size={22} />
+              <button
+                type="submit"
+                aria-label="Search"
+                style={{ flexShrink: 0 }}
+              >
+                <Search size={20} />
               </button>
 
               <button
                 type="button"
                 onClick={() => setOpenSearch(false)}
                 aria-label="Close search"
+                style={{ flexShrink: 0 }}
               >
-                <X size={22} />
+                <X size={20} />
               </button>
             </form>
           </div>
