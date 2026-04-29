@@ -106,13 +106,17 @@ export default async function DashboardPage() {
               <h1>Siloam Inventory</h1>
             </div>
 
-            <div className="actions">
-              <Link href="/items/new" className="primary-btn">
-                <PlusCircle size={18} />
-                Add
-              </Link>
+<div className="actions">
+  <Link href="/items/new" className="primary-btn">
+    <PlusCircle size={18} />
+    Add
+  </Link>
 
-            </div>
+  <Link href="/export" className="secondary-btn">
+    <Download size={18} />
+    Export
+  </Link>
+</div>
           </div>
 
           <div className="stats-grid">
