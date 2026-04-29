@@ -20,44 +20,79 @@ export default function InventoryFilters({ items }: { items: any[] }) {
   }, [items]);
 
   const filteredItems = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = search.toLowerCase().trim();
 
     return items.filter((item) => {
       const matchesSearch =
+        !q ||
         item.name?.toLowerCase().includes(q) ||
         item.category?.toLowerCase().includes(q) ||
         item.vendor?.toLowerCase().includes(q) ||
         item.serial_number?.toLowerCase().includes(q) ||
         item.inventory_number?.toLowerCase().includes(q);
 
-      const matchesCategory =
-        category === "all" || item.category === category;
-
-      const matchesStatus =
-        status === "all" || item.status === status;
+      const matchesCategory = category === "all" || item.category === category;
+      const matchesStatus = status === "all" || item.status === status;
 
       return matchesSearch && matchesCategory && matchesStatus;
     });
   }, [items, search, category, status]);
 
+  function cleanScannedText(text: string) {
+    let scanned = text.trim();
+
+    // اگر QR لینک کامل بود، آخرین بخش لینک را بگیر
+    // مثال: https://siloam-inventory.vercel.app/lookup/INV-20260429-9023
+    try {
+      if (scanned.startsWith("http")) {
+        const url = new URL(scanned);
+        scanned = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() || scanned);
+      }
+    } catch {
+      // اگر URL خراب بود، همان متن اصلی را نگه دار
+    }
+
+    return scanned.trim();
+  }
+
   function handleScan(text: string) {
     setShowScanner(false);
 
-    const scanned = text.trim();
+    const scanned = cleanScannedText(text);
+    const scannedLower = scanned.toLowerCase();
 
-    const found = items.find(
-      (item) =>
-        item.id === scanned ||
-        item.inventory_number === scanned ||
-        item.serial_number === scanned
-    );
+    console.log("SCANNED:", scanned);
+
+    const found = items.find((item) => {
+      const id = String(item.id || "").trim();
+      const inventoryNumber = String(item.inventory_number || "").trim();
+      const serialNumber = String(item.serial_number || "").trim();
+
+      const idLower = id.toLowerCase();
+      const invLower = inventoryNumber.toLowerCase();
+      const serialLower = serialNumber.toLowerCase();
+
+      return (
+        idLower === scannedLower ||
+        invLower === scannedLower ||
+        serialLower === scannedLower ||
+
+        // برای حالتی که QR ناقص باشد، مثلا فقط 20260429-9023
+        (invLower && invLower.includes(scannedLower)) ||
+        (scannedLower && scannedLower.includes(invLower)) ||
+
+        (serialLower && serialLower.includes(scannedLower)) ||
+        (scannedLower && scannedLower.includes(serialLower))
+      );
+    });
 
     if (found) {
       router.push(`/items/${found.id}`);
-    } else {
-      setSearch(scanned);
-      alert("Item not found. I added the scanned text to search.");
+      return;
     }
+
+    setSearch(scanned);
+    alert(`Item not found. Scanned: ${scanned}`);
   }
 
   return (
