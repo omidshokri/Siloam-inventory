@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import Link from "next/link";
 import { PlusCircle, Download } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
