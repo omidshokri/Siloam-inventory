@@ -89,6 +89,11 @@ export default function NewItemPage() {
       platform_fees: Number(form.platform_fees || 0),
       status: "in_stock",
     });
+if (error) {
+  alert(error.message);
+  console.error(error);
+  return;
+}
 
     setLoading(false);
 
