@@ -1,74 +1,161 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Home, Package, BarChart3, Settings, Search, Camera } from "lucide-react";
+import {
+  Home,
+  Package,
+  BarChart3,
+  Settings,
+  Search,
+  Camera,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import QRScanner from "./QRScanner";
 
 export default function BottomNav() {
   const router = useRouter();
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const [openSearch, setOpenSearch] = useState(false);
+  const [openScanner, setOpenScanner] = useState(false);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setOpenSearch(false);
+      }
+    }
+
+    if (openSearch) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openSearch]);
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!query.trim()) return;
+    const q = query.trim();
 
-    router.push(`/?search=${encodeURIComponent(query.trim())}`);
+    if (!q) return;
+
     setOpenSearch(false);
+    router.push(`/search?q=${encodeURIComponent(q)}`);
+  }
+
+  function handleScan(text: string) {
+    setOpenScanner(false);
+    setOpenSearch(false);
+
+    const scanned = text.trim();
+
+    if (scanned.startsWith("http")) {
+      window.location.href = scanned;
+      return;
+    }
+
+    router.push(`/search?q=${encodeURIComponent(scanned)}`);
   }
 
   return (
-    <div className="bottom-nav-wrap">
-      {openSearch ? (
-        <form className="bottom-search" onSubmit={submitSearch}>
-          <input
-            autoFocus
-            placeholder="Search inventory..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+    <>
+      <div className="bottom-nav-wrap">
+        {openSearch ? (
+          <div ref={searchRef} className="bottom-search-panel">
+            <form className="bottom-search" onSubmit={submitSearch}>
+              <input
+                autoFocus
+                placeholder="Search inventory..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
 
-          <button type="button" onClick={() => router.push("/?scan=true")}>
-            <Camera size={22} />
-          </button>
+              <button
+                type="button"
+                onClick={() => setOpenScanner(true)}
+                aria-label="Scan QR"
+              >
+                <Camera size={22} />
+              </button>
 
-          <button type="submit">
-            <Search size={22} />
-          </button>
-        </form>
-      ) : (
-        <div className="bottom-nav">
-          <Link href="/" className="bottom-nav-item">
-            <Home size={26} />
-            <span>Home</span>
-          </Link>
+              <button type="submit" aria-label="Search">
+                <Search size={22} />
+              </button>
 
-<Link href="/products" className="bottom-nav-item">
-            <Package size={26} />
-            <span>Products</span>
-          </Link>
+              <button
+                type="button"
+                onClick={() => setOpenSearch(false)}
+                aria-label="Close search"
+              >
+                <X size={22} />
+              </button>
+            </form>
+          </div>
+        ) : (
+          <div className="bottom-nav">
+            <Link href="/" className="bottom-nav-item">
+              <Home size={24} />
+              <span>Home</span>
+            </Link>
 
-          <Link href="/dashboard" className="bottom-nav-item">
-            <BarChart3 size={26} />
-            <span>Dashboard</span>
-          </Link>
+            <Link href="/products" className="bottom-nav-item">
+              <Package size={24} />
+              <span>Products</span>
+            </Link>
 
-          <Link href="/settings" className="bottom-nav-item">
-            <Settings size={26} />
-            <span>Settings</span>
-          </Link>
+            <Link href="/dashboard" className="bottom-nav-item">
+              <BarChart3 size={24} />
+              <span>Dashboard</span>
+            </Link>
 
-          <button
-            type="button"
-            className="bottom-nav-search"
-            onClick={() => setOpenSearch(true)}
-          >
-            <Search size={34} />
-          </button>
+            <Link href="/settings" className="bottom-nav-item">
+              <Settings size={24} />
+              <span>Settings</span>
+            </Link>
+
+            <button
+              type="button"
+              className="bottom-nav-search"
+              onClick={() => setOpenSearch(true)}
+              aria-label="Open search"
+            >
+              <Search size={30} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {openScanner && (
+        <div className="scanner-overlay">
+          <div className="scanner-modal">
+            <div className="scanner-modal-header">
+              <div>
+                <p className="eyebrow">QR Scanner</p>
+                <h2>Scan Product Code</h2>
+              </div>
+
+              <button
+                type="button"
+                className="secondary-btn"
+                onClick={() => setOpenScanner(false)}
+              >
+                Close
+              </button>
+            </div>
+
+            <QRScanner onScan={handleScan} />
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
