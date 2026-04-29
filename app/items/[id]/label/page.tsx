@@ -49,7 +49,7 @@ export default function LabelPage({
   if (!item) return null;
 
   const purchaseDate = item.purchase_date || "";
-  const inventoryNumber = item.inventory_number || "NO-INV";
+const inventoryNumber = item.inventory_number || item.serial_number || item.id;
   const serialTail = item.serial_number
     ? item.serial_number.slice(-4).toUpperCase()
     : "NOSN";
