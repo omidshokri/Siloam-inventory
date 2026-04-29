@@ -89,20 +89,9 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        <section className="section-card">
-          <div className="charts-grid">
-            <div className="chart-box">
-              <h2>Business Breakdown</h2>
-              <PieChartBreakdown data={pieChartData} />
-            </div>
-
-            <div className="chart-box">
-              <h2>Item Comparison</h2>
-              <BarChartProfit data={barChartData} />
-            </div>
-          </div>
-        </section>
-
+          ...
+</section>
+<InventoryFilters items={items} />
         <section className="section-card">
           <h2>Inventory Items</h2>
 
