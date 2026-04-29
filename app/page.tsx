@@ -8,7 +8,7 @@ import { money, netProfit, itemCost } from "@/lib/calculations";
 import PieChartBreakdown from "@/components/PieChartBreakdown";
 import BarChartProfit from "@/components/BarChartProfit";
 import LogoutButton from "../components/LogoutButton";
-import type { InventoryItem } from "@/types/inventory";
+import InventoryFilters from "@/components/InventoryFilters";
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
-  const items = (data || []) as InventoryItem[];
+  const items = data || [];
 
   const inStockItems = items.filter((item) => item.status !== "sold");
   const soldItems = items.filter((item) => item.status === "sold");
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
   const pieChartData = [
     { name: "Inventory", value: inventoryValue },
     { name: "Profit", value: totalProfit },
-    { name: "Sales Tax Collected", value: estimatedTax },
+    { name: "Tax", value: estimatedTax },
   ];
 
   const barChartData = items.map((item) => ({
@@ -57,6 +57,8 @@ export default async function DashboardPage() {
   return (
     <main className="app-shell">
       <div className="apple-container">
+
+        {/* 🔝 Header */}
         <section className="hero-card">
           <div className="hero-top">
             <div>
@@ -83,17 +85,30 @@ export default async function DashboardPage() {
             <Stat label="Inventory" value={money(inventoryValue)} />
             <Stat label="Sales" value={money(totalSales)} />
             <Stat label="Profit" value={money(totalProfit)} />
-            <Stat label="Estimated Tax" value={money(estimatedTax)} />
+            <Stat label="Tax" value={money(estimatedTax)} />
             <Stat label="After Tax" value={money(profitAfterTax)} />
-            <Stat label="Items in Stock" value={String(inStockItems.length)} />
+            <Stat label="In Stock" value={String(inStockItems.length)} />
           </div>
         </section>
 
-          ...
-</section>
-<InventoryFilters items={items} />
-          ...
-</section>
+        {/* 📊 Charts */}
+        <section className="section-card">
+          <div className="charts-grid">
+            <div className="chart-box">
+              <h2>Breakdown</h2>
+              <PieChartBreakdown data={pieChartData} />
+            </div>
+
+            <div className="chart-box">
+              <h2>Comparison</h2>
+              <BarChartProfit data={barChartData} />
+            </div>
+          </div>
+        </section>
+
+        {/* 🔍 Filters + List */}
+        <InventoryFilters items={items} />
+
       </div>
     </main>
   );
