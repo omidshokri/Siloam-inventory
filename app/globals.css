@@ -1131,3 +1131,76 @@ h2 {
 .formula-area textarea {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
+.builder-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 20px 0 28px;
+}
+
+.builder-preview-card {
+  min-height: 140px;
+  border-radius: 28px;
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.05);
+}
+
+.builder-preview-card h3 {
+  margin: 8px 0;
+  font-size: 24px;
+}
+
+.block-w-2 {
+  grid-column: span 2;
+}
+
+.block-h-2 {
+  min-height: 260px;
+}
+
+.builder-list {
+  display: grid;
+  gap: 18px;
+}
+
+.builder-card {
+  display: grid;
+  gap: 14px;
+  border-radius: 28px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.builder-card-top {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 14px;
+}
+
+.builder-size-grid {
+  display: grid;
+  grid-template-columns: 1fr 90px 90px 130px 130px auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.builder-card textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+@media (max-width: 800px) {
+  .builder-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .block-w-2 {
+    grid-column: span 1;
+  }
+
+  .builder-card-top,
+  .builder-size-grid {
+    grid-template-columns: 1fr;
+  }
+}

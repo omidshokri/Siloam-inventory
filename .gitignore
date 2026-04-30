@@ -8,3 +8,9 @@ node_modules/
 .env.local
 .env
 .DS_Store
+# backups
+*.zip
+backup/
+*.sql
+
+*.zip
