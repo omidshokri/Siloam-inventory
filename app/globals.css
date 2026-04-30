@@ -1014,7 +1014,7 @@ h2 {
   }
 }
 .formula-help {
-  margin-bottom: 18px;
+  margin: 18px 0 22px;
 }
 
 .formula-tags {
@@ -1025,52 +1025,65 @@ h2 {
 
 .formula-tags code {
   background: rgba(255, 255, 255, 0.75);
-  padding: 8px 10px;
+  padding: 8px 11px;
   border-radius: 999px;
   font-size: 12px;
 }
 
 .formula-editor-list {
   display: grid;
-  gap: 16px;
+  gap: 18px;
 }
 
-.formula-editor-card {
+.formula-card {
+  background: rgba(255, 255, 255, 0.68);
+  border-radius: 28px;
+  padding: 20px;
   display: grid;
-  grid-template-columns: 1fr 2fr 0.8fr 0.8fr 0.5fr auto auto;
-  gap: 12px;
+  gap: 14px;
+}
+
+.formula-card-top,
+.formula-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  gap: 14px;
+}
+
+.formula-card-grid {
+  grid-template-columns: 1fr 1fr auto;
   align-items: end;
-  padding: 16px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.65);
 }
 
-.formula-editor-card label {
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #6e6e73;
-}
-
-.formula-editor-card input,
-.formula-editor-card select,
-.formula-editor-card textarea {
-  min-height: 44px;
-  border-radius: 14px;
-  border: 0;
-  padding: 10px 12px;
-  font-size: 15px;
-  background: rgba(255, 255, 255, 0.85);
-}
-
-.formula-editor-card textarea {
-  min-height: 70px;
+.formula-card textarea {
+  min-height: 86px;
   resize: vertical;
 }
 
-@media (max-width: 900px) {
-  .formula-editor-card {
+.formula-toggle {
+  height: 64px;
+  padding: 0 16px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: #1d1d1f;
+}
+
+@media (max-width: 760px) {
+  .formula-card {
+    padding: 16px;
+    border-radius: 24px;
+  }
+
+  .formula-card-top,
+  .formula-card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .formula-toggle {
+    height: 52px;
   }
 }

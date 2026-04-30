@@ -15,9 +15,9 @@ const availableFields = [
 ];
 
 export default function FormulaEditor({ formulas }: { formulas: any[] }) {
-  const supabase = createBrowserSupabase();
+  const [supabase] = useState(() => createBrowserSupabase());
   const [rows, setRows] = useState(formulas);
-  const [saving, setSaving] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   function updateLocal(id: string, field: string, value: any) {
     setRows((current) =>
@@ -26,7 +26,7 @@ export default function FormulaEditor({ formulas }: { formulas: any[] }) {
   }
 
   async function addFormula() {
-    setSaving(true);
+    setSavingId("new");
 
     const { data, error } = await supabase
       .from("custom_formulas")
@@ -41,18 +41,18 @@ export default function FormulaEditor({ formulas }: { formulas: any[] }) {
       .select()
       .single();
 
-    setSaving(false);
+    setSavingId(null);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    setRows([...rows, data]);
+    setRows([...(rows || []), data]);
   }
 
   async function saveFormula(row: any) {
-    setSaving(true);
+    setSavingId(row.id);
 
     const { error } = await supabase
       .from("custom_formulas")
@@ -66,23 +66,27 @@ export default function FormulaEditor({ formulas }: { formulas: any[] }) {
       })
       .eq("id", row.id);
 
-    setSaving(false);
+    setSavingId(null);
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    alert("Saved");
+    alert("Formula saved");
   }
 
   async function deleteFormula(id: string) {
     if (!confirm("Delete this formula?")) return;
 
+    setSavingId(id);
+
     const { error } = await supabase
       .from("custom_formulas")
       .delete()
       .eq("id", id);
+
+    setSavingId(null);
 
     if (error) {
       alert(error.message);
@@ -97,18 +101,21 @@ export default function FormulaEditor({ formulas }: { formulas: any[] }) {
       <div className="hero-top">
         <div>
           <h2>Formula List</h2>
-          <p className="muted">
-            Use fields like purchase_price, repair_cost, sale_price.
-          </p>
+          <p className="muted">Create custom calculations for items and dashboards.</p>
         </div>
 
-        <button type="button" className="primary-btn" onClick={addFormula}>
-          Add Formula
+        <button
+          type="button"
+          className="primary-btn"
+          onClick={addFormula}
+          disabled={savingId === "new"}
+        >
+          {savingId === "new" ? "Adding..." : "Add Formula"}
         </button>
       </div>
 
       <div className="formula-help">
-        <p className="muted">Available fields:</p>
+        <p className="muted">Available fields</p>
         <div className="formula-tags">
           {availableFields.map((field) => (
             <code key={field}>{field}</code>
@@ -118,82 +125,87 @@ export default function FormulaEditor({ formulas }: { formulas: any[] }) {
 
       <div className="formula-editor-list">
         {rows.map((row) => (
-          <div key={row.id} className="formula-editor-card">
-            <label>
-              Name
-              <input
-                value={row.name || ""}
-                onChange={(e) => updateLocal(row.id, "name", e.target.value)}
-              />
-            </label>
+          <div key={row.id} className="formula-card">
+            <div className="formula-card-top">
+              <label className="field">
+                <span>Name</span>
+                <input
+                  value={row.name || ""}
+                  onChange={(e) => updateLocal(row.id, "name", e.target.value)}
+                />
+              </label>
 
-            <label>
-              Formula
+              <label className="field">
+                <span>Order</span>
+                <input
+                  type="number"
+                  value={row.sort_order ?? 0}
+                  onChange={(e) =>
+                    updateLocal(row.id, "sort_order", e.target.value)
+                  }
+                />
+              </label>
+            </div>
+
+            <label className="field">
+              <span>Formula</span>
               <textarea
                 value={row.formula || ""}
                 onChange={(e) => updateLocal(row.id, "formula", e.target.value)}
               />
             </label>
 
-            <label>
-              Scope
-              <select
-                value={row.scope}
-                onChange={(e) => updateLocal(row.id, "scope", e.target.value)}
-              >
-                <option value="item">Item</option>
-                <option value="dashboard">Dashboard</option>
-              </select>
-            </label>
+            <div className="formula-card-grid">
+              <label className="field">
+                <span>Scope</span>
+                <select
+                  value={row.scope || "item"}
+                  onChange={(e) => updateLocal(row.id, "scope", e.target.value)}
+                >
+                  <option value="item">Item</option>
+                  <option value="dashboard">Dashboard</option>
+                </select>
+              </label>
 
-            <label>
-              Format
-              <select
-                value={row.format}
-                onChange={(e) => updateLocal(row.id, "format", e.target.value)}
-              >
-                <option value="money">Money</option>
-                <option value="number">Number</option>
-                <option value="percent">Percent</option>
-              </select>
-            </label>
+              <label className="field">
+                <span>Format</span>
+                <select
+                  value={row.format || "money"}
+                  onChange={(e) => updateLocal(row.id, "format", e.target.value)}
+                >
+                  <option value="money">Money</option>
+                  <option value="number">Number</option>
+                  <option value="percent">Percent</option>
+                </select>
+              </label>
 
-            <label>
-              Order
-              <input
-                type="number"
-                value={row.sort_order ?? 0}
-                onChange={(e) =>
-                  updateLocal(row.id, "sort_order", e.target.value)
-                }
-              />
-            </label>
-
-            <label className="checkbox-row">
-              <input
-                type="checkbox"
-                checked={Boolean(row.enabled)}
-                onChange={(e) =>
-                  updateLocal(row.id, "enabled", e.target.checked)
-                }
-              />
-              Enabled
-            </label>
+              <label className="formula-toggle">
+                <input
+                  type="checkbox"
+                  checked={Boolean(row.enabled)}
+                  onChange={(e) =>
+                    updateLocal(row.id, "enabled", e.target.checked)
+                  }
+                />
+                Enabled
+              </label>
+            </div>
 
             <div className="actions">
               <button
                 type="button"
-                className="secondary-btn"
+                className="primary-btn"
                 onClick={() => saveFormula(row)}
-                disabled={saving}
+                disabled={savingId === row.id}
               >
-                Save
+                {savingId === row.id ? "Saving..." : "Save"}
               </button>
 
               <button
                 type="button"
                 className="danger-btn"
                 onClick={() => deleteFormula(row.id)}
+                disabled={savingId === row.id}
               >
                 Delete
               </button>
