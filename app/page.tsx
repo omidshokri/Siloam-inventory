@@ -5,9 +5,10 @@ import Link from "next/link";
 import { PlusCircle, Download } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { money, netProfit, itemCost } from "@/lib/calculations";
+import { calculateFormula, formatFormulaValue } from "@/lib/formula-engine";
 import PieChartBreakdown from "@/components/PieChartBreakdown";
 import BarChartProfit from "@/components/BarChartProfit";
-import LogoutButton from "../components/LogoutButton";
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function DashboardPage() {
   const supabase = createServerSupabase();
@@ -17,7 +18,15 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const { data: blocksData } = await supabase
+    .from("dashboard_blocks")
+    .select("*")
+    .eq("enabled", true)
+    .order("y", { ascending: true })
+    .order("x", { ascending: true });
+
   const items = data || [];
+  const blocks = blocksData || [];
 
   const inStockItems = items.filter((item) => item.status !== "sold");
   const soldItems = items.filter((item) => item.status === "sold");
@@ -53,11 +62,28 @@ export default async function DashboardPage() {
     profit: netProfit(item),
   }));
 
+  function blockValue(block: any) {
+    if (block.block_type === "text") return block.content || "";
+
+    if (block.block_type === "metric") {
+      const value = items.reduce((sum, item) => {
+        return sum + calculateFormula(block.formula || "0", item);
+      }, 0);
+
+      return formatFormulaValue(value, block.format || "money");
+    }
+
+    if (block.block_type === "date") {
+      return new Date().toLocaleDateString();
+    }
+
+    return block.content || "";
+  }
+
   return (
     <main className="app-shell">
       <div className="apple-container">
-
-        {/* 🔝 Header */}
+        {/* Header */}
         <section className="hero-card">
           <div className="hero-top">
             <div>
@@ -80,17 +106,33 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="stats-grid">
-            <Stat label="Inventory" value={money(inventoryValue)} />
-            <Stat label="Sales" value={money(totalSales)} />
-            <Stat label="Profit" value={money(totalProfit)} />
-            <Stat label="Tax" value={money(estimatedTax)} />
-            <Stat label="After Tax" value={money(profitAfterTax)} />
-            <Stat label="In Stock" value={String(inStockItems.length)} />
+          {/* Dynamic Builder Blocks */}
+          <div className="builder-preview-grid">
+            {blocks.length > 0 ? (
+              blocks.map((block) => (
+                <div
+                  key={block.id}
+                  className={`builder-preview-card block-w-${block.w} block-h-${block.h}`}
+                >
+                  <p className="eyebrow">{block.block_type}</p>
+                  <h3>{block.title}</h3>
+                  <strong>{blockValue(block)}</strong>
+                </div>
+              ))
+            ) : (
+              <div className="stats-grid">
+                <Stat label="Inventory" value={money(inventoryValue)} />
+                <Stat label="Sales" value={money(totalSales)} />
+                <Stat label="Profit" value={money(totalProfit)} />
+                <Stat label="Tax" value={money(estimatedTax)} />
+                <Stat label="After Tax" value={money(profitAfterTax)} />
+                <Stat label="In Stock" value={String(inStockItems.length)} />
+              </div>
+            )}
           </div>
         </section>
 
-        {/* 📊 Charts */}
+        {/* Charts */}
         <section className="section-card">
           <div className="charts-grid">
             <div className="chart-box">
@@ -104,9 +146,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         </section>
-
-        {/* 🔍 Filters + List */}
-
       </div>
     </main>
   );
