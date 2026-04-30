@@ -3,6 +3,7 @@ export const revalidate = 0;
 
 import { createServerSupabase } from "@/lib/supabase-server";
 import { itemCost, money, netProfit } from "@/lib/calculations";
+import { calculateFormula, formatFormulaValue } from "@/lib/formula-engine";
 
 const formulaLabels: Record<string, string> = {
   inventoryValue: "Inventory Value",
@@ -26,7 +27,8 @@ export default async function DashboardPage() {
 
   const { data: itemsData } = await supabase
     .from("inventory_items")
-    .select("*");
+    .select("*")
+    .order("created_at", { ascending: false });
 
   const { data: widgetsData } = await supabase
     .from("dashboard_widgets")
@@ -34,8 +36,16 @@ export default async function DashboardPage() {
     .eq("enabled", true)
     .order("sort_order", { ascending: true });
 
+  const { data: customFormulasData } = await supabase
+    .from("custom_formulas")
+    .select("*")
+    .eq("enabled", true)
+    .eq("scope", "dashboard")
+    .order("sort_order", { ascending: true });
+
   const items = itemsData || [];
   const widgets = widgetsData || [];
+  const customFormulas = customFormulasData || [];
 
   const inStockItems = items.filter((item) => item.status !== "sold");
   const soldItems = items.filter((item) => item.status === "sold");
@@ -69,6 +79,17 @@ export default async function DashboardPage() {
     totalItems: items.length,
   };
 
+  const computedCustom = customFormulas.map((formula) => {
+    const value = items.reduce((sum, item) => {
+      return sum + calculateFormula(formula.formula, item);
+    }, 0);
+
+    return {
+      ...formula,
+      value,
+    };
+  });
+
   return (
     <main className="app-shell">
       <div className="apple-container">
@@ -76,7 +97,8 @@ export default async function DashboardPage() {
           <p className="eyebrow">Custom dashboard</p>
           <h1>Dashboard</h1>
           <p className="muted">
-            These cards are controlled by your dashboard widgets.
+            These cards are controlled by your dashboard widgets and custom
+            formulas.
           </p>
         </section>
 
@@ -91,6 +113,16 @@ export default async function DashboardPage() {
                 <small className="muted">
                   {formulaLabels[widget.formula_key] || widget.formula_key}
                 </small>
+              </div>
+            ))}
+
+            {computedCustom.map((formula) => (
+              <div key={formula.id} className="stat-card">
+                <p>{formula.name}</p>
+                <strong>
+                  {formatFormulaValue(formula.value, formula.format)}
+                </strong>
+                <small className="muted">Custom formula</small>
               </div>
             ))}
           </div>
