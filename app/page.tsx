@@ -63,7 +63,13 @@ export default async function DashboardPage() {
   }));
 
   function blockValue(block: any) {
-    if (block.block_type === "text") return block.content || "";
+    if (block.block_type === "text") {
+      return block.content || "";
+    }
+
+    if (block.block_type === "date") {
+      return new Date().toLocaleDateString();
+    }
 
     if (block.block_type === "metric") {
       const value = items.reduce((sum, item) => {
@@ -73,17 +79,12 @@ export default async function DashboardPage() {
       return formatFormulaValue(value, block.format || "money");
     }
 
-    if (block.block_type === "date") {
-      return new Date().toLocaleDateString();
-    }
-
-    return block.content || "";
+    return block.content || "—";
   }
 
   return (
     <main className="app-shell">
       <div className="apple-container">
-        {/* Header */}
         <section className="hero-card">
           <div className="hero-top">
             <div>
@@ -106,10 +107,9 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Dynamic Builder Blocks */}
-          <div className="builder-preview-grid">
-            {blocks.length > 0 ? (
-              blocks.map((block) => (
+          {blocks.length > 0 ? (
+            <div className="builder-preview-grid">
+              {blocks.map((block) => (
                 <div
                   key={block.id}
                   className={`builder-preview-card block-w-${block.w} block-h-${block.h}`}
@@ -118,21 +118,20 @@ export default async function DashboardPage() {
                   <h3>{block.title}</h3>
                   <strong>{blockValue(block)}</strong>
                 </div>
-              ))
-            ) : (
-              <div className="stats-grid">
-                <Stat label="Inventory" value={money(inventoryValue)} />
-                <Stat label="Sales" value={money(totalSales)} />
-                <Stat label="Profit" value={money(totalProfit)} />
-                <Stat label="Tax" value={money(estimatedTax)} />
-                <Stat label="After Tax" value={money(profitAfterTax)} />
-                <Stat label="In Stock" value={String(inStockItems.length)} />
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="stats-grid">
+              <Stat label="Inventory" value={money(inventoryValue)} />
+              <Stat label="Sales" value={money(totalSales)} />
+              <Stat label="Profit" value={money(totalProfit)} />
+              <Stat label="Tax" value={money(estimatedTax)} />
+              <Stat label="After Tax" value={money(profitAfterTax)} />
+              <Stat label="In Stock" value={String(inStockItems.length)} />
+            </div>
+          )}
         </section>
 
-        {/* Charts */}
         <section className="section-card">
           <div className="charts-grid">
             <div className="chart-box">
