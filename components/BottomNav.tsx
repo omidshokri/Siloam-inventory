@@ -122,10 +122,6 @@ export default function BottomNav() {
 
               <span>Dashboard</span><LayoutDashboard size={24} />
   <span>Buiilder</span>
-<Link href="/dashboard/builder" className="bottom-nav-item">
-  <LayoutDashboard size={24} />
-  <span>Builder</span>
-</Link>
             <Link href="/settings" className="bottom-nav-item">
               <Settings size={24} />
               <span>Settings</span>
