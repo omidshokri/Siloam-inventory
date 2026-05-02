@@ -1,11 +1,11 @@
 "use client";
-
+import { BarChart3 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Home,
   Package,
-  BarChart3,
+  LayoutDashboard,
   Settings,
   Search,
   Camera,
@@ -120,11 +120,12 @@ export default function BottomNav() {
               <span>Products</span>
             </Link>
 
-            <Link href="/dashboard" className="bottom-nav-item">
               <BarChart3 size={24} />
-              <span>Dashboard</span>
-            </Link>
-
+  <span>Dashboard</span>
+<Link href="/dashboard/builder" className="bottom-nav-item">
+  <LayoutDashboard size={24} />
+  <span>Builder</span>
+</Link>
             <Link href="/settings" className="bottom-nav-item">
               <Settings size={24} />
               <span>Settings</span>
