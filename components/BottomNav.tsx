@@ -72,7 +72,6 @@ const [scannerOpen, setScannerOpen] = useState(false);
         </div>
 
       </div>
-{scannerOpen && <QrScanner onClose={() => setScannerOpen(false)} />}
     );
   }
 
@@ -127,5 +126,8 @@ const [scannerOpen, setScannerOpen] = useState(false);
         </button>
       </nav>
     </div>
+{scannerOpen && <QrScanner onClose={() => setScannerOpen(false)} />}
+  )}
+</>
   );
 }
