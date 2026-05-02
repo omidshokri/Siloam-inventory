@@ -75,59 +75,53 @@ const [scannerOpen, setScannerOpen] = useState(false);
     );
   }
 
-  return (
+return (
+  <>
     <div className="bottom-nav-wrap">
       <nav className="bottom-nav">
-        <Link
-          href="/"
-          className={`bottom-nav-item ${pathname === "/" ? "active" : ""}`}
-        >
+        {/* Home */}
+        <Link href="/" className={`bottom-nav-item ${pathname === "/" ? "active" : ""}`}>
           <Home size={24} />
           <span>Home</span>
         </Link>
 
-        <Link
-          href="/products"
-          className={`bottom-nav-item ${
-            pathname.startsWith("/products") ? "active" : ""
-          }`}
-        >
+        {/* Products */}
+        <Link href="/products" className={`bottom-nav-item ${pathname.startsWith("/products") ? "active" : ""}`}>
           <Package size={24} />
           <span>Products</span>
         </Link>
 
+        {/* Builder */}
         <Link
           href="/dashboard/builder"
-          className={`bottom-nav-item ${
-            pathname.startsWith("/dashboard/builder") ? "active" : ""
-          }`}
+          className={`bottom-nav-item ${pathname.startsWith("/dashboard/builder") ? "active" : ""}`}
         >
           <LayoutDashboard size={24} />
           <span>Builder</span>
         </Link>
 
+        {/* Settings */}
         <Link
           href="/settings"
-          className={`bottom-nav-item ${
-            pathname.startsWith("/settings") ? "active" : ""
-          }`}
+          className={`bottom-nav-item ${pathname.startsWith("/settings") ? "active" : ""}`}
         >
           <Settings size={24} />
           <span>Settings</span>
         </Link>
 
+        {/* Search */}
         <button
-          type="button"
           className="bottom-nav-search"
           onClick={() => setSearchOpen(true)}
-          aria-label="Open search"
         >
-          <Search size={30} />
+          <Search size={28} />
         </button>
       </nav>
     </div>
-{scannerOpen && <QrScanner onClose={() => setScannerOpen(false)} />}
-  )}
-</>
-  );
-}
+
+    {/* 👇 اینجا باید باشه */}
+    {scannerOpen && (
+      <QrScanner onClose={() => setScannerOpen(false)} />
+    )}
+  </>
+);
