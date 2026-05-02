@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+
 import { usePathname, useRouter } from "next/navigation";
 import {
   Home,
@@ -12,8 +13,12 @@ import {
   Camera,
   X,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const QrScanner = dynamic(() => import("./QrScanner"), { ssr: false });
 
 export default function BottomNav() {
+const [scannerOpen, setScannerOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -65,7 +70,9 @@ export default function BottomNav() {
             <X size={24} />
           </button>
         </div>
+
       </div>
+{scannerOpen && <QrScanner onClose={() => setScannerOpen(false)} />}
     );
   }
 

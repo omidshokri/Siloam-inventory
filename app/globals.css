@@ -1232,3 +1232,20 @@ v.bottom-nav {
   font-weight: 600;
 }
 
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  background: black;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.scanner-overlay button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: white;
+  border-radius: 10px;
+}
