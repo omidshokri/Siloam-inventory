@@ -26,7 +26,7 @@ export default async function DashboardPage() {
     .order("x", { ascending: true });
 
   const items = data || [];
-  const blocks = blocksData || [];
+  const blocks = blocksData ?? [];
 
   const inStockItems = items.filter((item) => item.status !== "sold");
   const soldItems = items.filter((item) => item.status === "sold");
@@ -85,7 +85,8 @@ export default async function DashboardPage() {
   return (
     <main className="app-shell">
       <div className="apple-container">
-        <section className="hero-card">
+<p>Blocks count: {blocks.length}</p>        
+<section className="hero-card">
           <div className="hero-top">
             <div>
               <p className="eyebrow">Small business tracker</p>
