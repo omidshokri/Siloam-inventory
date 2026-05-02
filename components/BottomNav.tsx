@@ -120,8 +120,8 @@ export default function BottomNav() {
               <span>Products</span>
             </Link>
 
-              <BarChart3 size={24} />
-  <span>Dashboard</span>
+              <span>Dashboard</span><LayoutDashboard size={24} />
+  <span>Buiilder</span>
 <Link href="/dashboard/builder" className="bottom-nav-item">
   <LayoutDashboard size={24} />
   <span>Builder</span>
