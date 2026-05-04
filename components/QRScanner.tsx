@@ -13,30 +13,43 @@ export default function QrScanner({ onClose }: { onClose: () => void }) {
     scanner
       .start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          scanner.stop();
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 },
+        },
+        async (decodedText) => {
+          await scanner.stop().catch(() => {});
 
-          // 👉 اگر QR فقط ID بود:
-          router.push(`/items/${decodedText}`);
+          const clean = decodedText.trim();
+
+          if (clean.startsWith("http")) {
+            window.location.href = clean;
+          } else {
+            router.push(`/items/${clean}`);
+          }
 
           onClose();
         },
         () => {}
       )
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        alert(error?.message || "Camera could not open");
       });
 
     return () => {
       scanner.stop().catch(() => {});
     };
-  }, []);
+  }, [router, onClose]);
 
   return (
     <div className="scanner-overlay">
-      <div id="qr-reader" style={{ width: "100%" }} />
-      <button onClick={onClose}>Close</button>
+      <div className="scanner-card">
+        <button type="button" className="scanner-close" onClick={onClose}>
+          Close
+        </button>
+
+        <div id="qr-reader" className="qr-reader" />
+      </div>
     </div>
   );
 }

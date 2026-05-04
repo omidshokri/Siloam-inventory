@@ -1249,3 +1249,34 @@ v.bottom-nav {
   background: white;
   border-radius: 10px;
 }
+.scanner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.scanner-card {
+  width: min(420px, 100%);
+  border-radius: 28px;
+  background: white;
+  padding: 18px;
+}
+
+.qr-reader {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.scanner-close {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}

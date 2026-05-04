@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import QRScanner from "./QRScanner";
+import QrScanner from "./QrScanner";
 import { money, netProfit } from "@/lib/calculations";
 
 export default function InventoryFilters({ items }: { items: any[] }) {
@@ -146,7 +146,7 @@ function handleScan(text: string) {
             Close Scanner
           </button>
 
-          <QRScanner onScan={handleScan} />
+          <QrScanner onScan={handleScan} />
         </div>
       )}
 
