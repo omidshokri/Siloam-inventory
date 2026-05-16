@@ -1,161 +1,193 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+import SiloamButton from "@/components/ui/SiloamButton";
+import SiloamCard from "@/components/ui/SiloamCard";
 
-import Link from "next/link";
-import { PlusCircle, Download } from "lucide-react";
-import { createServerSupabase } from "@/lib/supabase-server";
-import { money, netProfit, itemCost } from "@/lib/calculations";
-import { calculateFormula, formatFormulaValue } from "@/lib/formula-engine";
-import PieChartBreakdown from "@/components/PieChartBreakdown";
-import BarChartProfit from "@/components/BarChartProfit";
-import LogoutButton from "@/components/LogoutButton";
-
-export default async function DashboardPage() {
-  const supabase = createServerSupabase();
-
-  const { data } = await supabase
-    .from("inventory_items")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  const { data: blocksData } = await supabase
-    .from("dashboard_blocks")
-    .select("*")
-    .eq("enabled", true)
-    .order("y", { ascending: true })
-    .order("x", { ascending: true });
-
-  const items = data || [];
-  const blocks = blocksData ?? [];
-
-  const inStockItems = items.filter((item) => item.status !== "sold");
-  const soldItems = items.filter((item) => item.status === "sold");
-
-  const inventoryValue = inStockItems.reduce(
-    (sum, item) => sum + itemCost(item),
-    0
-  );
-
-  const totalSales = soldItems.reduce(
-    (sum, item) => sum + Number(item.sale_price ?? 0),
-    0
-  );
-
-  const totalProfit = soldItems.reduce(
-    (sum, item) => sum + netProfit(item),
-    0
-  );
-
-  const TAX_RATE = 0.25;
-  const estimatedTax = totalProfit > 0 ? totalProfit * TAX_RATE : 0;
-  const profitAfterTax = totalProfit - estimatedTax;
-
-  const pieChartData = [
-    { name: "Inventory", value: inventoryValue },
-    { name: "Profit", value: totalProfit },
-    { name: "Tax", value: estimatedTax },
-  ];
-
-  const barChartData = items.map((item) => ({
-    name: item.name || "Item",
-    cost: itemCost(item),
-    profit: netProfit(item),
-  }));
-
-  function blockValue(block: any) {
-    if (block.block_type === "text") {
-      return block.content || "";
-    }
-
-    if (block.block_type === "date") {
-      return new Date().toLocaleDateString();
-    }
-
-    if (block.block_type === "metric") {
-      const value = items.reduce((sum, item) => {
-        return sum + calculateFormula(block.formula || "0", item);
-      }, 0);
-
-      return formatFormulaValue(value, block.format || "money");
-    }
-
-    return block.content || "—";
-  }
-
+export default function HomePage() {
   return (
-    <main className="app-shell">
-      <div className="apple-container">
-<p>Blocks count: {blocks.length}</p>        
-<section className="hero-card">
-          <div className="hero-top">
-            <div>
-              <p className="eyebrow">Small business tracker</p>
-              <h1>Siloam Inventory</h1>
-            </div>
+    <main className="siloam-page">
+      <div className="siloam-shell">
+        {/* HERO */}
 
-            <div className="actions">
-              <Link href="/items/new" className="primary-btn">
-                <PlusCircle size={18} />
-                Add
-              </Link>
+        <section
+          style={{
+            paddingTop: 40,
+            paddingBottom: 28,
+          }}
+        >
+          <p className="siloam-eyebrow">Siloam Inventory</p>
 
-              <Link href="/export" className="secondary-btn">
-                <Download size={18} />
-                Export
-              </Link>
+          <h1
+            style={{
+              fontSize: "clamp(48px, 8vw, 82px)",
+              lineHeight: 0.92,
+              letterSpacing: "-0.07em",
+              maxWidth: 850,
+              margin: "16px 0",
+            }}
+          >
+            Your inventory.
+            <br />
+            Reimagined.
+          </h1>
 
-              <LogoutButton />
-            </div>
+          <p
+            className="siloam-muted"
+            style={{
+              maxWidth: 640,
+              fontSize: 18,
+              lineHeight: 1.8,
+              marginBottom: 28,
+            }}
+          >
+            Track purchases, profits, taxes, receipts, analytics, and inventory
+            movement in one intelligent Siloam workspace.
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <SiloamButton>
+              Open Inventory
+            </SiloamButton>
+
+            <SiloamButton variant="secondary">
+              Add Product
+            </SiloamButton>
           </div>
-
-          {blocks.length > 0 ? (
-            <div className="builder-preview-grid">
-              {blocks.map((block) => (
-                <div
-                  key={block.id}
-                  className={`builder-preview-card block-w-${block.w} block-h-${block.h}`}
-                >
-                  <p className="eyebrow">{block.block_type}</p>
-                  <h3>{block.title}</h3>
-                  <strong>{blockValue(block)}</strong>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="stats-grid">
-              <Stat label="Inventory" value={money(inventoryValue)} />
-              <Stat label="Sales" value={money(totalSales)} />
-              <Stat label="Profit" value={money(totalProfit)} />
-              <Stat label="Tax" value={money(estimatedTax)} />
-              <Stat label="After Tax" value={money(profitAfterTax)} />
-              <Stat label="In Stock" value={String(inStockItems.length)} />
-            </div>
-          )}
         </section>
 
-        <section className="section-card">
-          <div className="charts-grid">
-            <div className="chart-box">
-              <h2>Breakdown</h2>
-              <PieChartBreakdown data={pieChartData} />
-            </div>
+        {/* STATS */}
 
-            <div className="chart-box">
-              <h2>Comparison</h2>
-              <BarChartProfit data={barChartData} />
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 18,
+            marginTop: 28,
+          }}
+        >
+          <SiloamCard style={{ padding: 26 }}>
+            <p className="siloam-eyebrow">Inventory Value</p>
+
+            <h2
+              style={{
+                fontSize: 40,
+                margin: "12px 0 8px",
+                letterSpacing: "-0.05em",
+              }}
+            >
+              $12,450
+            </h2>
+
+            <p className="siloam-muted">
+              Current estimated stock value
+            </p>
+          </SiloamCard>
+
+          <SiloamCard style={{ padding: 26 }}>
+            <p className="siloam-eyebrow">Profit</p>
+
+            <h2
+              style={{
+                fontSize: 40,
+                margin: "12px 0 8px",
+                letterSpacing: "-0.05em",
+              }}
+            >
+              $4,320
+            </h2>
+
+            <p className="siloam-muted">
+              Estimated after-tax profit
+            </p>
+          </SiloamCard>
+
+          <SiloamCard style={{ padding: 26 }}>
+            <p className="siloam-eyebrow">Products</p>
+
+            <h2
+              style={{
+                fontSize: 40,
+                margin: "12px 0 8px",
+                letterSpacing: "-0.05em",
+              }}
+            >
+              128
+            </h2>
+
+            <p className="siloam-muted">
+              Active tracked inventory items
+            </p>
+          </SiloamCard>
+        </section>
+
+        {/* FEATURE CARD */}
+
+        <section
+          style={{
+            marginTop: 24,
+            marginBottom: 120,
+          }}
+        >
+          <SiloamCard
+            style={{
+              padding: 34,
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "radial-gradient(circle at top right, rgba(124,58,237,.22), transparent 35%)",
+                pointerEvents: "none",
+              }}
+            />
+
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              <p className="siloam-eyebrow">
+                Smart Analytics
+              </p>
+
+              <h2
+                style={{
+                  fontSize: "clamp(34px,5vw,58px)",
+                  lineHeight: 1,
+                  letterSpacing: "-0.06em",
+                  maxWidth: 700,
+                  margin: "12px 0",
+                }}
+              >
+                Built for modern resellers.
+              </h2>
+
+              <p
+                className="siloam-muted"
+                style={{
+                  maxWidth: 620,
+                  lineHeight: 1.8,
+                  fontSize: 17,
+                }}
+              >
+                Siloam helps you understand inventory movement,
+                tax estimates, product value, and profitability
+                through a clean premium interface.
+              </p>
             </div>
-          </div>
+          </SiloamCard>
         </section>
       </div>
     </main>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="stat-card">
-      <p>{label}</p>
-      <strong>{value}</strong>
-    </div>
   );
 }
